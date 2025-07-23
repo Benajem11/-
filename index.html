@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نكت مغربية بالصوت المضمون</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f7f9; --card-bg: #ffffff; --text-color: #2c3e50;
+            --primary-color: #e67e22; --primary-light: #fbeee0; --secondary-color: #95a5a6;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08); --icon-filter: grayscale(0%);
+        }
+        [data-theme="dark"] {
+            --bg-color: #1a202c; --card-bg: #2d3748; --text-color: #e2e8f0;
+            --primary-color: #f6ad55; --primary-light: #4a3a2d; --secondary-color: #718096;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.2); --icon-filter: invert(100%) grayscale(100%) brightness(2);
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; transition: background-color 0.3s, color 0.3s; }
+        .container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: var(--card-bg); border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow); }
+        .app-header h1 { margin: 0; font-size: 1.8em; color: var(--primary-color); }
+        #theme-toggle { background: none; border: 2px solid var(--secondary-color); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.5em; display: flex; align-items: center; justify-content: center; transition: transform 0.3s, border-color 0.3s; }
+        #theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
+        #jokes-container { display: grid; gap: 20px; }
+        .joke-card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); border-left: 5px solid var(--primary-color); transition: transform 0.2s, box-shadow 0.2s; }
+        .joke-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        .joke-text { font-size: 1.2em; line-height: 1.8; margin: 0 0 20px 0; }
+        .joke-controls { display: flex; align-items: center; gap: 15px; }
+        .play-btn { background-color: var(--primary-color); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.5em; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color 0.2s; }
+        .progress-container { flex-grow: 1; height: 8px; background-color: var(--primary-light); border-radius: 5px; cursor: pointer; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background-color: var(--primary-color); border-radius: 5px; transition: width 0.1s linear; }
+        .copy-btn { background: none; border: none; cursor: pointer; filter: var(--icon-filter); opacity: 0.6; transition: opacity 0.2s, transform 0.2s; }
+        .copy-btn:hover { opacity: 1; transform: scale(1.1); }
+        .copy-btn img { display: block; width: 24px; }
+        #status-bar { text-align: center; padding: 10px; color: var(--secondary-color); font-style: italic; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>نكت مغربية</h1>
+            <button id="theme-toggle" title="تبديل الوضع">🌙</button>
+        </header>
+        <main id="jokes-container"></main>
+        <div id="status-bar"></div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const jokesData = [
+            { id: 1, text: "هذا واحد المعلم سول التلاميذ ديالو: شكون يعطيني جملة فيها 'إنّ'؟ واحد الكسول رفع صبعو و قال: أنا أستاذ. قال ليه المعلم: قول. قال ليه التلميذ: شريت صباط 'إنّ' با ما عرفوش." },
+            { id: 2, text: "قالك هدا واحد ديما تابع ختو فين ما مشات. واحد النهار سولاتو: مالك ديما تابعني؟ قال ليها: حيت ماما قالت ليا تبع ختك فكولشي." },
+            { id: 3, text: "واحد مشا عند الطبيب قاليه: أ دكتور، كنحس براسي بحال شي وراق ديال الدفتر. قاليه الطبيب: مالك مسطر؟" },
+            { id: 4, text: "واحد سكران وقف تاكسي وقال لمولاه: خاوية؟ قال ليه مول التاكسي: آه. قاليه السكران: يالاه نزل نلعبو كولسة." },
+            { id: 5, text: "واحد البخيل سولوه: إلى جا البرد شنو كدير؟ قاليهم: كنقرب من الشمعة. سولوه: و إلى جا البرد كتر؟ قاليهم: كنشعلها." },
+            { id: 6, text: "هدا واحد مكلخ شرا بورطابل جديد، أول حاجة كتب فسطاتي: 'كنكتب من تيليفوني الجديد، الحمد لله'." },
+            { id: 7, text: "واحد سول صاحبو: شنو الفرق بين النملة و الفيل؟ جاوبو صاحبو: الفيل رجلو كتنمل، و لكن النملة رجلها مكتفيلش." },
+            { id: 8, text: "واحد مشا يخطب، سولو باها: ولدي، واش كتكمي؟ قاليه: لا أعمي. سولو: واش كتشرب؟ قاليه: لا أعمي. سولو: واش كتقمر؟ قاليه: لا أعمي. قاليه با البنت: ولدي معندك حتى شي ديفو؟ قاليه: عندي ديفو واحد، كنكدب بزاف." },
+            { id: 9, text: "هذا واحد غبي شرا تلاجة. ملي وصلها للدار، بغا يتأكد واش الضو ديالها كيطفا ملي كيتسد الباب. بقا كيسد و يحل بشوية باش يشوف." },
+            { id: 10, text: "واحد مشا عند مول الحانوت قاليه: عندك البيض؟ قاليه: آه. قاليه: عطيني 6، و لكن كل بيضة لويها فجورنان بوحدها." },
+            { id: 11, text: "واحد قصير بزاف، شرب دوا الكحة بالغلط، الصباح لقاو فيه الرغوة." },
+            { id: 12, text: "واحد كسول بزاف، طاحت منو 10 دراهم، بقا كيتسناها تطلع مع الريح." },
+            { id: 13, text: "معلم سول تلميذ: عطيني شي حاجة كطير و كتبدا بحرف الكاف. التلميذ كيفكر و قال: كوكو دجاجة." },
+            { id: 14, text: "واحد الحماق هرب من السبيطار، طلع فوق عمارة و كيهدد بالانتحار. جا عندو بوليسي حماق كتر منو قاليه: نزل، راه التيليفون كيصوني ليك لتحت." },
+            { id: 15, text: "واحد شرا طوموبيل أوتوماتيك، ملي بغا يوقف، بقا كيقلب على لومبرياج." },
+            { id: 16, text: "بخيل فالعرس ديالو، حط كاسيطة خاوية و قال للناس: اللي بغا شي غنية يغنيها." },
+            { id: 17, text: "واحد سول صاحبو: علاش البوليس كيلبسو زرق؟ قاليه صاحبو: حيت إلى لبسو بيض، غيحساب لينا طبة." },
+            { id: 18, text: "محشش سول صاحبو: شحال فالساعة؟ جبد صاحبو مراية و قاليه: شوف راسك." },
+            { id: 19, text: "واحد مشا للبحر، بغا يعوم، حط حوايجو و كتب فوقهم ورقة: 'متخافوش، أنا بطل ف الكاراتيه'." },
+            { id: 20, text: "واحد دخل لقهوة قال للݣارسون: عطيني قهوة كحلة. شوية رجع قاليه: سمح ليا، عندك قهوة بيضة؟" },
+            { id: 21, text: "أستاذ كيسول تلميذ: شنو هو الحيوان اللي كيصيح بكري؟ قاليه التلميذ: جارنا كيضرب مراتو." },
+            { id: 22, text: "واحد حاط قدامو كاس ديال أتاي خاوي و كاس عامر. سولوه علاش؟ قال ليهم: واحد إلى بغيت نشرب، و لاخر إلى مبغيتش." },
+            { id: 23, text: "هدا واحد مشا عند الطبيب قاليه: كنحلم براسي كناكل العدس. قاليه الطبيب: عادي. قاليه: لا ماشي عادي، راه كنفيق كنلقى المخدة كلها مرقة." },
+            { id: 24, text: "محشش شاف واحد كينقي الزيتون، قاليه: شحال و نتا خدام فهاد الخدمة؟ قاليه: من العصر. قاليه المحشش: إيوا من العصر للحاضر و مزال منقيتي والو." },
+            { id: 25, text: "هذا واحد مبوق سول صاحبو: واش القمر بعيد؟ قاليه صاحبو: واه. قاليه المبوق: كتر من طانطان؟" },
+            { id: 26, text: "واحد مرتو ولدات ليه بنت سابعة، سماها 'ختامها مسك'." },
+            { id: 27, text: "واحد زربان وقف على مول طاكسي قاليه: وصلني للمطار دغيا! قاليه مول الطاكسي: و لكن أنا غادي للجهة الأخرى. قاليه الزربان: ماشي مشكل، دور الطاكسي." },
+            { id: 28, text: "واحد مشا يشري ساعة، سول مول الحانوت: هادي شحال كدير؟ قاليه: ألف درهم. قاليه: و العقارب؟" },
+            { id: 29, text: "واحد دخل للسينما لقا الفيلم بدا، بقا غادي و كيقول للناس: سمح ليا، سمح ليا. حتى وصل لواحد السيد قاليه: ياك نتا اللي عفس عليا قبيلة؟ قاليه: آه. قاليه: نفس الصف هذا؟" },
+            { id: 30, text: "هدا واحد طلع فالطوبيس و هو يغوت: لي ضاعت ليه 50 درهم يجي ياخدها. ناضو كولشي. قاليهم: ماشي عليكم، أنا لي لقيتها." }
+        ];
+
+        const jokesContainer = document.getElementById('jokes-container');
+        const themeToggle = document.getElementById('theme-toggle');
+        const statusBar = document.getElementById('status-bar');
+        const appAudio = new Audio();
+
+        let currentlyPlaying = { jokeId: null, button: null, progressBar: null };
+
+        function renderJokes() {
+            jokesContainer.innerHTML = jokesData.map(joke => `
+                <article class="joke-card" id="joke-${joke.id}">
+                    <p class="joke-text">${joke.text}</p>
+                    <div class="joke-controls">
+                        <button class="play-btn" data-jokeid="${joke.id}" title="تشغيل/إيقاف مؤقت">▶</button>
+                        <div class="progress-container"><div class="progress-bar"></div></div>
+                        <button class="copy-btn" title="نسخ النكتة">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZHRoPSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgeD0iOCIgeT0iOCIgcng9IjIiIHJ5PSIyIi8+PHBhdGggZD0iTTQgNEgxNmMxLjEgMCAyIC45IDIgMnYxMCIvPjwvc3ZnPg==" alt="Copy">
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function stopCurrentAudio() {
+            appAudio.pause();
+            if (currentlyPlaying.button) {
+                currentlyPlaying.button.textContent = '▶';
+                currentlyPlaying.progressBar.style.width = '0%';
+            }
+            currentlyPlaying = { jokeId: null, button: null, progressBar: null };
+        }
+
+        function playJoke(jokeId) {
+            const joke = jokesData.find(j => j.id === jokeId);
+            if (!joke) return;
+
+            // إذا كانت نفس النكتة تعمل بالفعل، أوقفها مؤقتًا
+            if (currentlyPlaying.jokeId === jokeId && !appAudio.paused) {
+                appAudio.pause();
+                currentlyPlaying.button.textContent = '▶';
+                return;
+            }
+
+            // إذا كانت متوقفة مؤقتًا، أكملها
+            if (currentlyPlaying.jokeId === jokeId && appAudio.paused) {
+                appAudio.play();
+                currentlyPlaying.button.textContent = '❚❚';
+                return;
+            }
+            
+            // إذا كانت نكتة جديدة، أوقف القديمة وشغل الجديدة
+            stopCurrentAudio();
+            
+            const button = document.querySelector(`.play-btn[data-jokeid="${jokeId}"]`);
+            const progressBar = document.querySelector(`#joke-${jokeId} .progress-bar`);
+            currentlyPlaying = { jokeId, button, progressBar };
+            
+            // بناء رابط الصوت من خدمة جوجل
+            const textToSpeak = encodeURIComponent(joke.text);
+            const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${textToSpeak}&tl=ar&client=tw-ob`;
+            
+            appAudio.src = audioUrl;
+            appAudio.play().then(() => {
+                button.textContent = '❚❚';
+                statusBar.style.display = 'none';
+            }).catch(error => {
+                console.error("Error playing audio:", error);
+                statusBar.textContent = "حدث خطأ. تأكد من اتصالك بالإنترنت.";
+                statusBar.style.display = 'block';
+                stopCurrentAudio();
+            });
+        }
+        
+        appAudio.addEventListener('timeupdate', () => {
+            if (appAudio.paused || !currentlyPlaying.progressBar) return;
+            const progressPercent = (appAudio.currentTime / appAudio.duration) * 100;
+            currentlyPlaying.progressBar.style.width = `${progressPercent}%`;
+        });
+        appAudio.addEventListener('ended', stopCurrentAudio);
+
+        jokesContainer.addEventListener('click', (e) => {
+            const playButton = e.target.closest('.play-btn');
+            if (playButton) {
+                playJoke(parseInt(playButton.dataset.jokeid));
+                return;
+            }
+
+            const copyButton = e.target.closest('.copy-btn');
+            if (copyButton) {
+                const textToCopy = copyButton.closest('.joke-card').querySelector('.joke-text').textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalIcon = copyButton.innerHTML;
+                    copyButton.innerHTML = `<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZHRoPSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMyOGE3NDUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjAgNkw5IDE3bC00LTQiLz48L3N2Zz4=" alt="Copied">`;
+                    setTimeout(() => { copyButton.innerHTML = originalIcon; }, 1500);
+                });
+            }
+        });
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
+        });
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+
+        renderJokes();
+    });
+    </script>
+</body>
+</html>
